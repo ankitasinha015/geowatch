@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoWatch — US & India Geopolitical News</title>
+  <meta name="description" content="Daily geopolitical news intelligence focused on United States and India. Trade, diplomacy, defense & security.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo">GeoWatch</a>
+      <nav class="header-nav">
+        <span id="last-updated"></span>
+        <button id="refresh-btn" class="btn-icon" title="Refresh feeds">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="filters-inner">
+      <div class="country-tabs" id="country-tabs">
+        <button class="tab active" data-country="All">All</button>
+        <button class="tab" data-country="US">US</button>
+        <button class="tab" data-country="India">India</button>
+        <button class="tab" data-country="World">World</button>
+      </div>
+      <div class="divider"></div>
+      <div class="category-tabs" id="category-filters">
+        <button class="cat active" data-category="All">All Topics</button>
+        <button class="cat" data-category="Geopolitics">Geopolitics</button>
+        <button class="cat" data-category="Trade & Economy">Trade</button>
+        <button class="cat" data-category="Diplomacy & Relations">Diplomacy</button>
+        <button class="cat" data-category="Defense & Security">Defense</button>
+      </div>
+      <div class="search-wrapper">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search articles...">
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-strip">
+    <div class="stats-inner" id="stats-bar"></div>
+  </div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Hero (top story) -->
+    <section id="hero-section" class="hero-section"></section>
+
+    <!-- Article List -->
+    <section id="news-list" class="news-list"></section>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Loading intelligence...</p>
+    </div>
+
+    <!-- Load More -->
+    <div class="load-more-wrapper" id="load-more-wrapper" style="display:none">
+      <button id="load-more-btn" class="btn-secondary">Load more articles</button>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-brand">GeoWatch</span>
+      <span class="footer-sources">BBC &middot; NY Times &middot; The Hindu &middot; NDTV &middot; Al Jazeera &middot; AP News &middot; Google News</span>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

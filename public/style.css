@@ -20,6 +20,8 @@
   --amber-soft: #fffbeb;
   --red: #dc2626;
   --red-soft: #fef2f2;
+  --purple: #7c3aed;
+  --purple-soft: #f5f3ff;
   --radius: 8px;
   --max-width: 720px;
   --max-width-wide: 960px;
@@ -277,6 +279,7 @@ main {
 .hero-category[data-cat="Trade & Economy"] { color: var(--amber); background: var(--amber-soft); }
 .hero-category[data-cat="Diplomacy & Relations"] { color: var(--green); background: var(--green-soft); }
 .hero-category[data-cat="Defense & Security"] { color: var(--red); background: var(--red-soft); }
+.hero-category[data-cat="AI & Tech"] { color: var(--purple); background: var(--purple-soft); }
 
 .hero-title {
   font-family: 'Newsreader', Georgia, serif;
@@ -358,6 +361,7 @@ main {
 .article-cat[data-cat="Trade & Economy"] { color: var(--amber); background: var(--amber-soft); }
 .article-cat[data-cat="Diplomacy & Relations"] { color: var(--green); background: var(--green-soft); }
 .article-cat[data-cat="Defense & Security"] { color: var(--red); background: var(--red-soft); }
+.article-cat[data-cat="AI & Tech"] { color: var(--purple); background: var(--purple-soft); }
 
 .article-country {
   font-size: 0.65rem;

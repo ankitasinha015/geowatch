@@ -5,7 +5,7 @@ const path = require('path');
 
 const app = express();
 const parser = new RSSParser({
-  timeout: 10000,
+  timeout: 20000,
   headers: {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
   }
@@ -31,6 +31,12 @@ const FEEDS = [
   { url: 'https://www.aljazeera.com/xml/rss/all.xml', source: 'Al Jazeera', region: 'world' },
   // AP News
   { url: 'https://feedx.net/rss/ap.xml', source: 'AP News', region: 'world' },
+  // AI & Tech / Silicon Valley
+  { url: 'https://feeds.bbci.co.uk/news/technology/rss.xml', source: 'BBC Tech', region: 'us' },
+  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml', source: 'NY Times Tech', region: 'us' },
+  { url: 'https://www.theverge.com/rss/index.xml', source: 'The Verge', region: 'us' },
+  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/', source: 'TechCrunch', region: 'us' },
+  { url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', source: 'Ars Technica', region: 'us' },
 ];
 
 // --- Geopolitical Keywords ---
@@ -64,6 +70,19 @@ const GEO_KEYWORDS = [
   'china', 'russia', 'pakistan', 'israel', 'gaza', 'palestine', 'iran',
   'north korea', 'taiwan', 'afghanistan', 'myanmar', 'bangladesh', 'sri lanka',
   'middle east', 'south china sea', 'arctic',
+  // AI & Silicon Valley
+  'artificial intelligence', 'generative ai', 'openai', 'chatgpt', 'gpt-',
+  'anthropic', 'claude', 'google deepmind', 'deepmind', 'gemini ai', 'meta ai',
+  'llama', 'mistral', 'ai model', 'large language', 'llm', 'machine learning',
+  'deep learning', 'neural network', 'ai regulation', 'ai safety', 'ai policy',
+  'ai chip', 'nvidia', 'ai startup', 'silicon valley', 'sam altman',
+  'sundar pichai', 'satya nadella', 'mark zuckerberg', 'elon musk',
+  'venture capital', 'vc funding', 'series a', 'series b', 'y combinator',
+  'sequoia', 'andreessen', 'techcrunch', 'autonomous', 'self-driving',
+  'robotics', 'ai arms race', 'compute', 'data center', 'cloud computing',
+  'microsoft ai', 'google ai', 'apple ai', 'amazon ai', 'hugging face',
+  'stable diffusion', 'midjourney', 'ai copyright', 'ai regulation',
+  'executive order ai', 'eu ai act', 'ai governance',
 ];
 
 // --- Category Classification ---
@@ -84,6 +103,17 @@ const CATEGORIES = {
     'navy', 'air force', 'pentagon', 'war', 'conflict', 'troops', 'soldier',
     'drone', 'strike', 'terrorism', 'terror', 'intelligence', 'espionage',
     'cyber attack', 'border', 'ceasefire', 'invasion', 'nato',
+  ],
+  'AI & Tech': [
+    'artificial intelligence', 'generative ai', 'openai', 'chatgpt', 'gpt',
+    'anthropic', 'claude', 'deepmind', 'gemini', 'meta ai', 'llama', 'mistral',
+    'ai model', 'large language', 'llm', 'machine learning', 'deep learning',
+    'neural network', 'ai regulation', 'ai safety', 'ai policy', 'ai chip',
+    'nvidia', 'silicon valley', 'startup', 'venture capital', 'vc funding',
+    'y combinator', 'autonomous', 'self-driving', 'robotics', 'compute',
+    'data center', 'cloud computing', 'hugging face', 'stable diffusion',
+    'midjourney', 'ai copyright', 'ai governance', 'eu ai act',
+    'sam altman', 'satya nadella', 'sundar pichai',
   ],
 };
 

@@ -178,6 +178,7 @@ function renderStats(data) {
     { name: 'Trade', color: 'var(--amber)', count: data.byCategory['Trade & Economy'] || 0 },
     { name: 'Diplomacy', color: 'var(--green)', count: data.byCategory['Diplomacy & Relations'] || 0 },
     { name: 'Defense', color: 'var(--red)', count: data.byCategory['Defense & Security'] || 0 },
+    { name: 'AI & Tech', color: 'var(--purple)', count: data.byCategory['AI & Tech'] || 0 },
   ];
 
   statsBar.innerHTML = `

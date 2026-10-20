@@ -37,22 +37,13 @@ const FEEDS = [
   { url: 'https://www.theverge.com/rss/index.xml', source: 'The Verge', region: 'us', category: 'AI & Tech' },
   { url: 'https://feeds.bbci.co.uk/news/technology/rss.xml', source: 'BBC Tech', region: 'world', category: 'AI & Tech' },
 
-  // === GEOPOLITICS & WORLD (general — keyword filtered) ===
+  // === GEOPOLITICS & WORLD (minimal — keyword filtered, kept lean) ===
   { url: 'https://feeds.bbci.co.uk/news/world/rss.xml', source: 'BBC', region: 'world', category: null },
   { url: 'https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml', source: 'BBC', region: 'us', category: null },
   { url: 'https://feeds.bbci.co.uk/news/world/asia/rss.xml', source: 'BBC', region: 'india', category: null },
-  { url: 'https://feeds.bbci.co.uk/news/world/europe/rss.xml', source: 'BBC', region: 'world', category: null },
-  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', region: 'world', category: null },
-  { url: 'https://feeds.bbci.co.uk/news/business/rss.xml', source: 'BBC Business', region: 'world', category: null },
   { url: 'https://feeds.feedburner.com/ndtvnews-india-news', source: 'NDTV', region: 'india', category: null },
-  { url: 'https://feeds.feedburner.com/ndtvnews-world-news', source: 'NDTV', region: 'world', category: null },
-  { url: 'https://www.aljazeera.com/xml/rss/all.xml', source: 'Al Jazeera', region: 'world', category: null },
   { url: 'https://feedx.net/rss/ap.xml', source: 'AP News', region: 'world', category: null },
   { url: 'https://www.cnbc.com/id/100727362/device/rss/rss.html', source: 'CNBC', region: 'us', category: null },
-  { url: 'https://www.france24.com/en/rss', source: 'France 24', region: 'world', category: null },
-  { url: 'https://www.dw.com/rss/en/top-stories/s-9097', source: 'DW News', region: 'world', category: null },
-  { url: 'https://english.alarabiya.net/tools/rss', source: 'Al Arabiya', region: 'world', category: null },
-  { url: 'https://www3.nhk.or.jp/nhkworld/en/news/feeds/', source: 'NHK World', region: 'world', category: null },
 ];
 
 // Block sports/entertainment/lifestyle junk from general news feeds

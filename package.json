@@ -2,10 +2,10 @@
   "name": "pulse-news-dashboard",
   "version": "2.0.0",
   "description": "Real-time news intelligence: funding, geopolitics, and AI",
-  "main": "server.js",
+  "main": "dev-server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node dev-server.js",
+    "dev": "node dev-server.js"
   },
   "engines": {
     "node": ">=18.0.0"

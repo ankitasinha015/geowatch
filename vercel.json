@@ -1,9 +1,4 @@
 {
-  "rewrites": [
-    { "source": "/api/news", "destination": "/api/news" },
-    { "source": "/api/stats", "destination": "/api/stats" },
-    { "source": "/api/refresh", "destination": "/api/refresh" }
-  ],
   "functions": {
     "api/**/*.js": {
       "maxDuration": 30
@@ -12,7 +7,7 @@
   "crons": [
     {
       "path": "/api/cron",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }

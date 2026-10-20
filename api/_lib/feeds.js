@@ -10,130 +10,120 @@ const parser = new RSSParser({
   },
 });
 
+// Each feed has a `category` — if set, ALL articles from that feed go into
+// that category without keyword filtering. Only feeds with category: null
+// go through keyword classification.
 const FEEDS = [
-  // Geopolitics / World News (all free)
-  { url: 'https://feeds.bbci.co.uk/news/world/rss.xml', source: 'BBC', region: 'world' },
-  { url: 'https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml', source: 'BBC', region: 'us' },
-  { url: 'https://feeds.bbci.co.uk/news/world/asia/rss.xml', source: 'BBC', region: 'india' },
-  { url: 'https://feeds.bbci.co.uk/news/business/rss.xml', source: 'BBC Business', region: 'world' },
-  { url: 'https://feeds.feedburner.com/ndtvnews-india-news', source: 'NDTV', region: 'india' },
-  { url: 'https://feeds.feedburner.com/ndtvnews-world-news', source: 'NDTV', region: 'world' },
-  { url: 'https://www.aljazeera.com/xml/rss/all.xml', source: 'Al Jazeera', region: 'world' },
-  { url: 'https://feedx.net/rss/ap.xml', source: 'AP News', region: 'world' },
-  { url: 'https://www.cnbc.com/id/100727362/device/rss/rss.html', source: 'CNBC', region: 'us' },
+  // === FUNDING & STARTUPS (direct — every article is funding news) ===
+  { url: 'https://techcrunch.com/category/venture/feed/', source: 'TechCrunch', region: 'us', category: 'Funding' },
+  { url: 'https://techcrunch.com/category/startups/feed/', source: 'TechCrunch', region: 'us', category: 'Funding' },
+  { url: 'https://news.crunchbase.com/feed/', source: 'Crunchbase', region: 'us', category: 'Funding' },
+  { url: 'https://www.saastr.com/feed/', source: 'SaaStr', region: 'us', category: 'Funding' },
+  { url: 'https://feeds.feedburner.com/ycombinator', source: 'Hacker News', region: 'us', category: 'Funding' },
+  { url: 'https://techfundingnews.com/feed/', source: 'Tech Funding News', region: 'world', category: 'Funding' },
+  { url: 'https://sifted.eu/feed', source: 'Sifted', region: 'world', category: 'Funding' },
+  { url: 'https://inc42.com/feed/', source: 'Inc42', region: 'india', category: 'Funding' },
+  { url: 'https://entrackr.com/feed/', source: 'Entrackr', region: 'india', category: 'Funding' },
+  { url: 'https://yourstory.com/feed', source: 'YourStory', region: 'india', category: 'Funding' },
 
-  // AI & Tech (all free)
-  { url: 'https://feeds.bbci.co.uk/news/technology/rss.xml', source: 'BBC Tech', region: 'us' },
-  { url: 'https://www.theverge.com/rss/index.xml', source: 'The Verge', region: 'us' },
-  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/', source: 'TechCrunch AI', region: 'us' },
-  { url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', source: 'Ars Technica', region: 'us' },
-  { url: 'https://news.mit.edu/topic/mitartificial-intelligence2-rss.xml', source: 'MIT News', region: 'us' },
-  { url: 'https://thenextweb.com/neural/feed', source: 'TNW Neural', region: 'us' },
-  { url: 'https://www.artificialintelligence-news.com/feed/', source: 'AI News', region: 'us' },
+  // === AI & TECH (direct — every article is AI/tech news) ===
+  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/', source: 'TechCrunch', region: 'us', category: 'AI & Tech' },
+  { url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', source: 'The Verge', region: 'us', category: 'AI & Tech' },
+  { url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', source: 'Ars Technica', region: 'us', category: 'AI & Tech' },
+  { url: 'https://news.mit.edu/topic/mitartificial-intelligence2-rss.xml', source: 'MIT News', region: 'us', category: 'AI & Tech' },
+  { url: 'https://www.artificialintelligence-news.com/feed/', source: 'AI News', region: 'us', category: 'AI & Tech' },
+  { url: 'https://the-decoder.com/feed/', source: 'The Decoder', region: 'world', category: 'AI & Tech' },
+  { url: 'https://www.marktechpost.com/feed/', source: 'MarkTechPost', region: 'us', category: 'AI & Tech' },
+  { url: 'https://www.theverge.com/rss/index.xml', source: 'The Verge', region: 'us', category: 'AI & Tech' },
+  { url: 'https://feeds.bbci.co.uk/news/technology/rss.xml', source: 'BBC Tech', region: 'world', category: 'AI & Tech' },
 
-  // Funding & Startups (all free)
-  { url: 'https://techcrunch.com/category/venture/feed/', source: 'TechCrunch VC', region: 'us' },
-  { url: 'https://techcrunch.com/category/startups/feed/', source: 'TechCrunch Startups', region: 'us' },
-  { url: 'https://news.crunchbase.com/feed/', source: 'Crunchbase News', region: 'us' },
-  { url: 'https://www.saastr.com/feed/', source: 'SaaStr', region: 'us' },
-  { url: 'https://feeds.feedburner.com/ycombinator', source: 'Y Combinator', region: 'us' },
-  { url: 'https://techfundingnews.com/feed/', source: 'Tech Funding News', region: 'us' },
-  { url: 'https://sifted.eu/feed', source: 'Sifted', region: 'world' },
+  // === GEOPOLITICS & WORLD (general — keyword filtered) ===
+  { url: 'https://feeds.bbci.co.uk/news/world/rss.xml', source: 'BBC', region: 'world', category: null },
+  { url: 'https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml', source: 'BBC', region: 'us', category: null },
+  { url: 'https://feeds.bbci.co.uk/news/world/asia/rss.xml', source: 'BBC', region: 'india', category: null },
+  { url: 'https://feeds.bbci.co.uk/news/world/europe/rss.xml', source: 'BBC', region: 'world', category: null },
+  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', region: 'world', category: null },
+  { url: 'https://feeds.bbci.co.uk/news/business/rss.xml', source: 'BBC Business', region: 'world', category: null },
+  { url: 'https://feeds.feedburner.com/ndtvnews-india-news', source: 'NDTV', region: 'india', category: null },
+  { url: 'https://feeds.feedburner.com/ndtvnews-world-news', source: 'NDTV', region: 'world', category: null },
+  { url: 'https://www.aljazeera.com/xml/rss/all.xml', source: 'Al Jazeera', region: 'world', category: null },
+  { url: 'https://feedx.net/rss/ap.xml', source: 'AP News', region: 'world', category: null },
+  { url: 'https://www.cnbc.com/id/100727362/device/rss/rss.html', source: 'CNBC', region: 'us', category: null },
+  { url: 'https://www.france24.com/en/rss', source: 'France 24', region: 'world', category: null },
+  { url: 'https://www.dw.com/rss/en/top-stories/s-9097', source: 'DW News', region: 'world', category: null },
+  { url: 'https://english.alarabiya.net/tools/rss', source: 'Al Arabiya', region: 'world', category: null },
+  { url: 'https://www3.nhk.or.jp/nhkworld/en/news/feeds/', source: 'NHK World', region: 'world', category: null },
 ];
 
+// Keywords only used for general news feeds (category: null)
 const CATEGORIES = {
   'Funding': [
     'funding', 'funded', 'raises', 'raised', 'seed round', 'series a', 'series b',
-    'series c', 'series d', 'series e', 'pre-seed', 'ipo', 'spac', 'valuation',
-    'unicorn', 'decacorn', 'venture capital', 'vc ', 'vc-', 'angel investor',
-    'y combinator', 'yc ', 'accelerator', 'incubator', 'sequoia', 'andreessen',
-    'a16z', 'tiger global', 'softbank vision', 'accel', 'benchmark',
-    'greylock', 'khosla', 'lightspeed', 'index ventures', 'bessemer',
-    'fundraise', 'fundraising', 'round of funding', 'capital raise',
-    'growth round', 'debt financing', 'revenue financing', 'bridge round',
-    'down round', 'up round', 'term sheet', 'lead investor', 'co-investor',
-    'pitch deck', 'startup acquisition', 'acqui-hire', 'merger', 'acquisition',
-    'acquired by', 'buyout', 'exit', 'went public', 'listing',
-    'crunchbase', 'pitchbook', 'dealroom', 'pre-money', 'post-money',
-    '$m funding', '$b funding', 'million funding', 'billion funding',
-    'million round', 'billion round', 'seed funding', 'venture funding',
-    'startup fund', 'investment round',
+    'series c', 'series d', 'pre-seed', 'ipo', 'valuation', 'unicorn',
+    'venture capital', 'angel investor', 'accelerator', 'fundraise',
+    'startup acquisition', 'acqui-hire', 'acquired by', 'buyout',
+    'million round', 'billion round', 'investment round',
   ],
   'AI & Tech': [
     'artificial intelligence', 'generative ai', 'openai', 'chatgpt', 'gpt-',
-    'anthropic', 'claude', 'google deepmind', 'deepmind', 'gemini ai', 'meta ai',
+    'anthropic', 'claude', 'deepmind', 'gemini ai', 'meta ai',
     'llama', 'mistral', 'ai model', 'large language', 'llm', 'machine learning',
-    'deep learning', 'neural network', 'ai regulation', 'ai safety', 'ai policy',
-    'ai chip', 'nvidia', 'ai startup', 'silicon valley', 'sam altman',
-    'sundar pichai', 'satya nadella', 'mark zuckerberg', 'elon musk',
-    'autonomous', 'self-driving', 'robotics', 'ai arms race', 'compute',
-    'data center', 'cloud computing', 'microsoft ai', 'google ai', 'apple ai',
-    'amazon ai', 'hugging face', 'stable diffusion', 'midjourney',
-    'ai copyright', 'ai governance', 'eu ai act', 'executive order ai',
-    'transformer model', 'diffusion model', 'text-to-image', 'text-to-video',
-    'foundation model', 'frontier model', 'agi', 'artificial general',
-    'reinforcement learning', 'computer vision', 'natural language processing',
-    'nlp', 'ai agent', 'multimodal', 'open source ai', 'open-source ai',
-    'ai benchmark', 'gpu', 'tpu', 'inference', 'fine-tuning', 'fine tuning',
-    'prompt engineering', 'rag ', 'retrieval augmented', 'vector database',
-    'embeddings', 'token', 'context window', 'reasoning model',
-    'xai', 'groq', 'perplexity', 'cohere', 'databricks', 'snowflake ai',
-    'ai hardware', 'neuromorphic', 'quantum computing', 'quantum computer',
+    'deep learning', 'neural network', 'ai regulation', 'ai safety',
+    'ai chip', 'nvidia', 'silicon valley', 'sam altman',
+    'autonomous', 'self-driving', 'robotics', 'data center',
+    'foundation model', 'frontier model', 'agi',
+    'quantum computing', 'ai agent', 'gpu', 'tpu',
   ],
   'Trade & Economy': [
     'tariff', 'sanction', 'trade war', 'trade deal', 'trade agreement', 'export ban',
-    'import duty', 'economic sanction', 'embargo', 'trade deficit', 'trade surplus',
-    'free trade', 'wto', 'imf', 'world bank', 'currency', 'oil price', 'opec',
-    'supply chain', 'chips act', 'semiconductor', 'gdp', 'inflation', 'fiscal',
-    'monetary', 'interest rate', 'federal reserve', 'central bank', 'recession',
-    'economic growth', 'stock market', 'bond market', 'commodity',
+    'import duty', 'embargo', 'trade deficit', 'wto', 'imf', 'world bank',
+    'oil price', 'opec', 'supply chain', 'semiconductor', 'gdp', 'inflation',
+    'interest rate', 'federal reserve', 'central bank', 'recession',
+    'economic growth', 'stock market',
   ],
   'Diplomacy & Relations': [
     'diplomacy', 'diplomat', 'bilateral', 'multilateral', 'summit', 'treaty',
-    'accord', 'pact', 'alliance', 'ambassador', 'embassy', 'consulate',
+    'accord', 'pact', 'alliance', 'ambassador', 'embassy',
     'state visit', 'foreign minister', 'secretary of state', 'united nations',
     'general assembly', 'g7', 'g20', 'quad', 'brics', 'sco', 'asean',
-    'extradition', 'asylum', 'refugee', 'visa ban', 'travel ban',
+    'asylum', 'refugee', 'visa ban', 'travel ban', 'extradition',
   ],
   'Defense & Security': [
     'military', 'defense', 'defence', 'missile', 'nuclear', 'weapon', 'army',
-    'navy', 'air force', 'pentagon', 'war', 'conflict', 'troops', 'soldier',
-    'drone', 'strike', 'terrorism', 'terror', 'intelligence', 'espionage',
-    'cyber attack', 'border', 'ceasefire', 'invasion', 'nato', 'occupation',
+    'navy', 'air force', 'pentagon', 'war ', 'conflict', 'troops', 'soldier',
+    'drone strike', 'terrorism', 'terror attack', 'espionage',
+    'cyber attack', 'ceasefire', 'invasion', 'nato', 'occupation',
   ],
   'Geopolitics': [
     'geopolit', 'foreign policy', 'white house', 'congress', 'senate',
-    'state department', 'cia', 'fbi', 'president biden', 'president trump',
-    'us-china', 'us-russia', 'us-india', 'indo-pacific', 'taiwan', 'ukraine',
-    'iran', 'north korea', 'modi', 'india-china', 'india-pakistan', 'kashmir',
-    'ladakh', 'arunachal', 'lok sabha', 'rajya sabha', 'jaishankar',
-    'china', 'russia', 'pakistan', 'israel', 'gaza', 'palestine',
-    'afghanistan', 'myanmar', 'middle east', 'south china sea', 'arctic',
+    'state department', 'president biden', 'president trump',
+    'us-china', 'us-russia', 'indo-pacific', 'taiwan strait', 'ukraine',
+    'north korea', 'modi government', 'india-china', 'india-pakistan',
+    'kashmir', 'israel', 'gaza', 'palestine', 'protest', 'coup',
+    'election', 'referendum', 'political crisis', 'regime',
+    'south china sea', 'middle east',
   ],
 };
 
 const US_KEYWORDS = [
-  'united states', 'america', 'us ', 'u.s.', 'washington', 'white house',
+  'united states', 'america', 'u.s.', 'washington', 'white house',
   'congress', 'senate', 'pentagon', 'biden', 'trump', 'republican', 'democrat',
-  'state department', 'cia', 'fbi', 'california', 'new york', 'texas',
-  'silicon valley', 'san francisco', 'seattle',
+  'california', 'new york', 'texas', 'silicon valley', 'san francisco',
 ];
 
 const INDIA_KEYWORDS = [
   'india', 'indian', 'modi', 'delhi', 'mumbai', 'lok sabha', 'rajya sabha',
-  'jaishankar', 'kashmir', 'ladakh', 'arunachal', 'hindu', 'bjp',
-  'indian army', 'isro', 'chennai', 'kolkata', 'bangalore', 'bengaluru',
-  'hyderabad',
+  'jaishankar', 'kashmir', 'bjp', 'isro', 'bangalore', 'bengaluru',
+  'hyderabad', 'chennai', 'kolkata',
 ];
 
-// Module-level cache survives across warm serverless invocations
 let cache = {
   articles: [],
   lastFetched: null,
   fetching: false,
 };
 
-const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+const CACHE_TTL = 15 * 60 * 1000;
 
 function classifyCategory(text) {
   const lower = text.toLowerCase();
@@ -173,6 +163,7 @@ async function fetchAllFeeds() {
           pubDate: item.pubDate || item.isoDate || '',
           source: feed.source,
           feedRegion: feed.region,
+          feedCategory: feed.category,
         }));
       } catch {
         return [];
@@ -186,20 +177,27 @@ async function fetchAllFeeds() {
     }
   }
 
-  const filtered = articles.filter(a => {
+  // For feeds with a set category, include ALL articles.
+  // For general feeds (category: null), only include if keywords match.
+  const enriched = [];
+  for (const a of articles) {
     const text = `${a.title} ${a.description}`;
-    return classifyCategory(text) !== null;
-  });
+    let category;
 
-  const enriched = filtered.map(a => {
-    const text = `${a.title} ${a.description}`;
-    return {
+    if (a.feedCategory) {
+      category = a.feedCategory;
+    } else {
+      category = classifyCategory(text);
+      if (!category) continue;
+    }
+
+    enriched.push({
       ...a,
-      category: classifyCategory(text) || 'Geopolitics',
+      category,
       countries: detectCountry(text),
       timestamp: a.pubDate ? new Date(a.pubDate).getTime() : Date.now(),
-    };
-  });
+    });
+  }
 
   enriched.sort((a, b) => b.timestamp - a.timestamp);
 

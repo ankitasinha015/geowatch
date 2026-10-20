@@ -55,6 +55,24 @@ const FEEDS = [
   { url: 'https://www3.nhk.or.jp/nhkworld/en/news/feeds/', source: 'NHK World', region: 'world', category: null },
 ];
 
+// Block sports/entertainment/lifestyle junk from general news feeds
+const JUNK_KEYWORDS = [
+  'premier league', 'champions league', 'world cup', 'fa cup', 'europa league',
+  'la liga', 'serie a', 'bundesliga', 'ligue 1', 'mls ',
+  'football', 'soccer', 'cricket', 'tennis', 'basketball', 'nba ', 'nfl ',
+  'rugby', 'golf', 'formula 1', 'f1 ', 'olympics', 'fifa',
+  'celebrity', 'kardashian', 'reality tv', 'box office', 'movie review',
+  'album review', 'grammy', 'oscar', 'emmy', 'red carpet',
+  'horoscope', 'zodiac', 'recipe', 'cooking', 'fashion week',
+  'psg ', 'barcelona', 'real madrid', 'manchester', 'liverpool fc',
+  'arsenal', 'chelsea fc', 'bayern', 'juventus',
+];
+
+function isJunk(text) {
+  const lower = text.toLowerCase();
+  return JUNK_KEYWORDS.some(kw => lower.includes(kw));
+}
+
 // Keywords only used for general news feeds (category: null)
 const CATEGORIES = {
   'Funding': [
@@ -177,8 +195,6 @@ async function fetchAllFeeds() {
     }
   }
 
-  // For feeds with a set category, include ALL articles.
-  // For general feeds (category: null), only include if keywords match.
   const enriched = [];
   for (const a of articles) {
     const text = `${a.title} ${a.description}`;
@@ -187,6 +203,7 @@ async function fetchAllFeeds() {
     if (a.feedCategory) {
       category = a.feedCategory;
     } else {
+      if (isJunk(text)) continue;
       category = classifyCategory(text);
       if (!category) continue;
     }
@@ -199,8 +216,7 @@ async function fetchAllFeeds() {
     });
   }
 
-  enriched.sort((a, b) => b.timestamp - a.timestamp);
-
+  // Deduplicate
   const seen = new Set();
   const deduped = enriched.filter(a => {
     const key = a.title.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 50);
@@ -209,7 +225,30 @@ async function fetchAllFeeds() {
     return true;
   });
 
-  cache.articles = deduped;
+  // Interleave categories so the front page shows a mix.
+  // Group by category, sort each group by time, then round-robin.
+  const groups = {};
+  for (const a of deduped) {
+    if (!groups[a.category]) groups[a.category] = [];
+    groups[a.category].push(a);
+  }
+  for (const cat of Object.keys(groups)) {
+    groups[cat].sort((a, b) => b.timestamp - a.timestamp);
+  }
+
+  const priority = ['Funding', 'AI & Tech', 'Geopolitics', 'Trade & Economy', 'Defense & Security', 'Diplomacy & Relations'];
+  const sortedCats = priority.filter(c => groups[c]);
+  const interleaved = [];
+  let maxLen = Math.max(...sortedCats.map(c => groups[c].length));
+  for (let i = 0; i < maxLen; i++) {
+    for (const cat of sortedCats) {
+      if (i < groups[cat].length) {
+        interleaved.push(groups[cat][i]);
+      }
+    }
+  }
+
+  cache.articles = interleaved;
   cache.lastFetched = new Date().toISOString();
   cache.fetching = false;
 

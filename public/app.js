@@ -174,11 +174,12 @@ async function fetchStats() {
 
 function renderStats(data) {
   const cats = [
+    { name: 'Funding', color: 'var(--teal)', count: data.byCategory['Funding'] || 0 },
+    { name: 'AI & Tech', color: 'var(--purple)', count: data.byCategory['AI & Tech'] || 0 },
     { name: 'Geopolitics', color: 'var(--blue)', count: data.byCategory['Geopolitics'] || 0 },
     { name: 'Trade', color: 'var(--amber)', count: data.byCategory['Trade & Economy'] || 0 },
     { name: 'Diplomacy', color: 'var(--green)', count: data.byCategory['Diplomacy & Relations'] || 0 },
     { name: 'Defense', color: 'var(--red)', count: data.byCategory['Defense & Security'] || 0 },
-    { name: 'AI & Tech', color: 'var(--purple)', count: data.byCategory['AI & Tech'] || 0 },
   ];
 
   statsBar.innerHTML = `

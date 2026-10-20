@@ -1,7 +1,7 @@
 {
-  "name": "geopolitical-news-dashboard",
-  "version": "1.0.0",
-  "description": "Daily geopolitical news dashboard focused on US and India",
+  "name": "pulse-news-dashboard",
+  "version": "2.0.0",
+  "description": "Real-time news intelligence: funding, geopolitics, and AI",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

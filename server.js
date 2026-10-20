@@ -1,3 +1,5 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const express = require('express');
 const RSSParser = require('rss-parser');
 const cron = require('node-cron');
@@ -15,105 +17,105 @@ const PORT = process.env.PORT || 3000;
 
 // --- RSS Feed Sources ---
 const FEEDS = [
-  // US-focused
-  { url: 'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FtVnVHZ0pWVXlnQVAB', source: 'Google News', region: 'world' },
-  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml', source: 'NY Times', region: 'world' },
-  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml', source: 'NY Times', region: 'us' },
+  // === Geopolitics / World News (all free, no paywall) ===
   { url: 'https://feeds.bbci.co.uk/news/world/rss.xml', source: 'BBC', region: 'world' },
   { url: 'https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml', source: 'BBC', region: 'us' },
   { url: 'https://feeds.bbci.co.uk/news/world/asia/rss.xml', source: 'BBC', region: 'india' },
-  // India-focused
-  { url: 'https://www.thehindu.com/news/national/feeder/default.rss', source: 'The Hindu', region: 'india' },
-  { url: 'https://www.thehindu.com/news/international/feeder/default.rss', source: 'The Hindu', region: 'world' },
+  { url: 'https://feeds.bbci.co.uk/news/business/rss.xml', source: 'BBC Business', region: 'world' },
   { url: 'https://feeds.feedburner.com/ndtvnews-india-news', source: 'NDTV', region: 'india' },
   { url: 'https://feeds.feedburner.com/ndtvnews-world-news', source: 'NDTV', region: 'world' },
-  // Al Jazeera
   { url: 'https://www.aljazeera.com/xml/rss/all.xml', source: 'Al Jazeera', region: 'world' },
-  // AP News
   { url: 'https://feedx.net/rss/ap.xml', source: 'AP News', region: 'world' },
-  // AI & Tech / Silicon Valley
+  { url: 'https://www.cnbc.com/id/100727362/device/rss/rss.html', source: 'CNBC', region: 'us' },
+
+  // === AI & Tech (all free) ===
   { url: 'https://feeds.bbci.co.uk/news/technology/rss.xml', source: 'BBC Tech', region: 'us' },
-  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml', source: 'NY Times Tech', region: 'us' },
   { url: 'https://www.theverge.com/rss/index.xml', source: 'The Verge', region: 'us' },
-  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/', source: 'TechCrunch', region: 'us' },
+  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/', source: 'TechCrunch AI', region: 'us' },
   { url: 'https://feeds.arstechnica.com/arstechnica/technology-lab', source: 'Ars Technica', region: 'us' },
+  { url: 'https://news.mit.edu/topic/mitartificial-intelligence2-rss.xml', source: 'MIT News', region: 'us' },
+  { url: 'https://thenextweb.com/neural/feed', source: 'TNW Neural', region: 'us' },
+  { url: 'https://www.artificialintelligence-news.com/feed/', source: 'AI News', region: 'us' },
+
+  // === Funding & Startups (all free) ===
+  { url: 'https://techcrunch.com/category/venture/feed/', source: 'TechCrunch VC', region: 'us' },
+  { url: 'https://techcrunch.com/category/startups/feed/', source: 'TechCrunch Startups', region: 'us' },
+  { url: 'https://news.crunchbase.com/feed/', source: 'Crunchbase News', region: 'us' },
+  { url: 'https://www.saastr.com/feed/', source: 'SaaStr', region: 'us' },
+  { url: 'https://feeds.feedburner.com/ycombinator', source: 'Y Combinator', region: 'us' },
+  { url: 'https://techfundingnews.com/feed/', source: 'Tech Funding News', region: 'us' },
+  { url: 'https://sifted.eu/feed', source: 'Sifted', region: 'world' },
 ];
 
-// --- Geopolitical Keywords ---
-const GEO_KEYWORDS = [
-  // General geopolitics
-  'geopolit', 'foreign policy', 'diplomacy', 'diplomat', 'bilateral', 'multilateral',
-  'summit', 'treaty', 'accord', 'pact', 'alliance', 'nato', 'quad', 'g7', 'g20',
-  'united nations', 'un security', 'general assembly',
-  // Defense & Security
-  'military', 'defense', 'defence', 'missile', 'nuclear', 'weapons', 'army', 'navy',
-  'air force', 'pentagon', 'war', 'conflict', 'troops', 'soldier', 'drone', 'strike',
-  'terrorism', 'terror', 'intelligence', 'espionage', 'cyber attack', 'border',
-  'ceasefire', 'invasion', 'occupation',
-  // Trade & Economy
-  'tariff', 'sanction', 'trade war', 'trade deal', 'trade agreement', 'export ban',
-  'import duty', 'economic sanction', 'embargo', 'trade deficit', 'trade surplus',
-  'free trade', 'wto', 'imf', 'world bank', 'currency', 'oil price', 'opec',
-  'supply chain', 'chips act', 'semiconductor',
-  // Diplomacy
-  'ambassador', 'embassy', 'consulate', 'extradition', 'asylum', 'refugee',
-  'visa ban', 'travel ban', 'state visit', 'foreign minister', 'secretary of state',
-  // US specific
-  'white house', 'congress', 'senate', 'pentagon', 'state department', 'cia', 'fbi',
-  'president biden', 'president trump', 'us-china', 'us-russia', 'us-india',
-  'indo-pacific', 'taiwan', 'ukraine', 'iran', 'north korea',
-  // India specific
-  'modi', 'india-china', 'india-pakistan', 'kashmir', 'ladakh', 'arunachal',
-  'lok sabha', 'rajya sabha', 'mea india', 'jaishankar', 'indian army',
-  'brics', 'sco', 'asean', 'south asia', 'indian ocean',
-  // Countries/regions of interest
-  'china', 'russia', 'pakistan', 'israel', 'gaza', 'palestine', 'iran',
-  'north korea', 'taiwan', 'afghanistan', 'myanmar', 'bangladesh', 'sri lanka',
-  'middle east', 'south china sea', 'arctic',
-  // AI & Silicon Valley
-  'artificial intelligence', 'generative ai', 'openai', 'chatgpt', 'gpt-',
-  'anthropic', 'claude', 'google deepmind', 'deepmind', 'gemini ai', 'meta ai',
-  'llama', 'mistral', 'ai model', 'large language', 'llm', 'machine learning',
-  'deep learning', 'neural network', 'ai regulation', 'ai safety', 'ai policy',
-  'ai chip', 'nvidia', 'ai startup', 'silicon valley', 'sam altman',
-  'sundar pichai', 'satya nadella', 'mark zuckerberg', 'elon musk',
-  'venture capital', 'vc funding', 'series a', 'series b', 'y combinator',
-  'sequoia', 'andreessen', 'techcrunch', 'autonomous', 'self-driving',
-  'robotics', 'ai arms race', 'compute', 'data center', 'cloud computing',
-  'microsoft ai', 'google ai', 'apple ai', 'amazon ai', 'hugging face',
-  'stable diffusion', 'midjourney', 'ai copyright', 'ai regulation',
-  'executive order ai', 'eu ai act', 'ai governance',
-];
-
-// --- Category Classification ---
+// --- Category Keywords ---
 const CATEGORIES = {
+  'Funding': [
+    'funding', 'funded', 'raises', 'raised', 'seed round', 'series a', 'series b',
+    'series c', 'series d', 'series e', 'pre-seed', 'ipo', 'spac', 'valuation',
+    'unicorn', 'decacorn', 'venture capital', 'vc ', 'vc-', 'angel investor',
+    'y combinator', 'yc ', 'accelerator', 'incubator', 'sequoia', 'andreessen',
+    'a16z', 'tiger global', 'softbank vision', 'accel', 'benchmark',
+    'greylock', 'khosla', 'lightspeed', 'index ventures', 'bessemer',
+    'fundraise', 'fundraising', 'round of funding', 'capital raise',
+    'growth round', 'debt financing', 'revenue financing', 'bridge round',
+    'down round', 'up round', 'term sheet', 'lead investor', 'co-investor',
+    'pitch deck', 'startup acquisition', 'acqui-hire', 'merger', 'acquisition',
+    'acquired by', 'buyout', 'exit', 'went public', 'listing',
+    'crunchbase', 'pitchbook', 'dealroom', 'pre-money', 'post-money',
+    '$m funding', '$b funding', 'million funding', 'billion funding',
+    'million round', 'billion round', 'seed funding', 'venture funding',
+    'startup fund', 'investment round',
+  ],
+  'AI & Tech': [
+    'artificial intelligence', 'generative ai', 'openai', 'chatgpt', 'gpt-',
+    'anthropic', 'claude', 'google deepmind', 'deepmind', 'gemini ai', 'meta ai',
+    'llama', 'mistral', 'ai model', 'large language', 'llm', 'machine learning',
+    'deep learning', 'neural network', 'ai regulation', 'ai safety', 'ai policy',
+    'ai chip', 'nvidia', 'ai startup', 'silicon valley', 'sam altman',
+    'sundar pichai', 'satya nadella', 'mark zuckerberg', 'elon musk',
+    'autonomous', 'self-driving', 'robotics', 'ai arms race', 'compute',
+    'data center', 'cloud computing', 'microsoft ai', 'google ai', 'apple ai',
+    'amazon ai', 'hugging face', 'stable diffusion', 'midjourney',
+    'ai copyright', 'ai governance', 'eu ai act', 'executive order ai',
+    'transformer model', 'diffusion model', 'text-to-image', 'text-to-video',
+    'foundation model', 'frontier model', 'agi', 'artificial general',
+    'reinforcement learning', 'computer vision', 'natural language processing',
+    'nlp', 'ai agent', 'multimodal', 'open source ai', 'open-source ai',
+    'ai benchmark', 'gpu', 'tpu', 'inference', 'fine-tuning', 'fine tuning',
+    'prompt engineering', 'rag ', 'retrieval augmented', 'vector database',
+    'embeddings', 'token', 'context window', 'reasoning model',
+    'xai', 'groq', 'perplexity', 'cohere', 'databricks', 'snowflake ai',
+    'ai hardware', 'neuromorphic', 'quantum computing', 'quantum computer',
+  ],
   'Trade & Economy': [
-    'tariff', 'sanction', 'trade', 'economic', 'export', 'import', 'wto', 'imf',
-    'world bank', 'currency', 'oil price', 'opec', 'supply chain', 'semiconductor',
-    'chips act', 'embargo', 'gdp', 'inflation', 'fiscal', 'monetary',
+    'tariff', 'sanction', 'trade war', 'trade deal', 'trade agreement', 'export ban',
+    'import duty', 'economic sanction', 'embargo', 'trade deficit', 'trade surplus',
+    'free trade', 'wto', 'imf', 'world bank', 'currency', 'oil price', 'opec',
+    'supply chain', 'chips act', 'semiconductor', 'gdp', 'inflation', 'fiscal',
+    'monetary', 'interest rate', 'federal reserve', 'central bank', 'recession',
+    'economic growth', 'stock market', 'bond market', 'commodity',
   ],
   'Diplomacy & Relations': [
     'diplomacy', 'diplomat', 'bilateral', 'multilateral', 'summit', 'treaty',
     'accord', 'pact', 'alliance', 'ambassador', 'embassy', 'consulate',
     'state visit', 'foreign minister', 'secretary of state', 'united nations',
     'general assembly', 'g7', 'g20', 'quad', 'brics', 'sco', 'asean',
+    'extradition', 'asylum', 'refugee', 'visa ban', 'travel ban',
   ],
   'Defense & Security': [
     'military', 'defense', 'defence', 'missile', 'nuclear', 'weapon', 'army',
     'navy', 'air force', 'pentagon', 'war', 'conflict', 'troops', 'soldier',
     'drone', 'strike', 'terrorism', 'terror', 'intelligence', 'espionage',
-    'cyber attack', 'border', 'ceasefire', 'invasion', 'nato',
+    'cyber attack', 'border', 'ceasefire', 'invasion', 'nato', 'occupation',
   ],
-  'AI & Tech': [
-    'artificial intelligence', 'generative ai', 'openai', 'chatgpt', 'gpt',
-    'anthropic', 'claude', 'deepmind', 'gemini', 'meta ai', 'llama', 'mistral',
-    'ai model', 'large language', 'llm', 'machine learning', 'deep learning',
-    'neural network', 'ai regulation', 'ai safety', 'ai policy', 'ai chip',
-    'nvidia', 'silicon valley', 'startup', 'venture capital', 'vc funding',
-    'y combinator', 'autonomous', 'self-driving', 'robotics', 'compute',
-    'data center', 'cloud computing', 'hugging face', 'stable diffusion',
-    'midjourney', 'ai copyright', 'ai governance', 'eu ai act',
-    'sam altman', 'satya nadella', 'sundar pichai',
+  'Geopolitics': [
+    'geopolit', 'foreign policy', 'white house', 'congress', 'senate',
+    'state department', 'cia', 'fbi', 'president biden', 'president trump',
+    'us-china', 'us-russia', 'us-india', 'indo-pacific', 'taiwan', 'ukraine',
+    'iran', 'north korea', 'modi', 'india-china', 'india-pakistan', 'kashmir',
+    'ladakh', 'arunachal', 'lok sabha', 'rajya sabha', 'jaishankar',
+    'china', 'russia', 'pakistan', 'israel', 'gaza', 'palestine',
+    'afghanistan', 'myanmar', 'middle east', 'south china sea', 'arctic',
   ],
 };
 
@@ -122,12 +124,14 @@ const US_KEYWORDS = [
   'united states', 'america', 'us ', 'u.s.', 'washington', 'white house',
   'congress', 'senate', 'pentagon', 'biden', 'trump', 'republican', 'democrat',
   'state department', 'cia', 'fbi', 'california', 'new york', 'texas',
+  'silicon valley', 'san francisco', 'seattle',
 ];
 
 const INDIA_KEYWORDS = [
   'india', 'indian', 'modi', 'delhi', 'mumbai', 'lok sabha', 'rajya sabha',
   'jaishankar', 'kashmir', 'ladakh', 'arunachal', 'hindu', 'bjp',
-  'indian army', 'isro', 'chennai', 'kolkata', 'bangalore',
+  'indian army', 'isro', 'chennai', 'kolkata', 'bangalore', 'bengaluru',
+  'hyderabad',
 ];
 
 // --- Cache ---
@@ -137,11 +141,6 @@ let newsCache = {
   fetching: false,
 };
 
-function isGeopolitical(text) {
-  const lower = text.toLowerCase();
-  return GEO_KEYWORDS.some(kw => lower.includes(kw));
-}
-
 function classifyCategory(text) {
   const lower = text.toLowerCase();
   const scores = {};
@@ -149,7 +148,11 @@ function classifyCategory(text) {
     scores[cat] = keywords.filter(kw => lower.includes(kw)).length;
   }
   const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
-  return best[1] > 0 ? best[0] : 'Geopolitics';
+  return best[1] > 0 ? best[0] : null;
+}
+
+function isRelevant(text) {
+  return classifyCategory(text) !== null;
 }
 
 function detectCountry(text) {
@@ -180,7 +183,7 @@ async function fetchAllFeeds() {
           feedRegion: feed.region,
         }));
       } catch (err) {
-        console.warn(`  Failed to fetch ${feed.source} (${feed.url}): ${err.message}`);
+        console.warn(`  Failed: ${feed.source} — ${err.message}`);
         return [];
       }
     })
@@ -192,10 +195,10 @@ async function fetchAllFeeds() {
     }
   }
 
-  // Filter for geopolitical relevance
+  // Filter for relevance (matches any tracked category)
   const filtered = articles.filter(a => {
     const text = `${a.title} ${a.description}`;
-    return isGeopolitical(text);
+    return isRelevant(text);
   });
 
   // Classify and tag
@@ -203,13 +206,13 @@ async function fetchAllFeeds() {
     const text = `${a.title} ${a.description}`;
     return {
       ...a,
-      category: classifyCategory(text),
+      category: classifyCategory(text) || 'Geopolitics',
       countries: detectCountry(text),
       timestamp: a.pubDate ? new Date(a.pubDate).getTime() : Date.now(),
     };
   });
 
-  // Sort by date (newest first) and deduplicate by title similarity
+  // Sort by date (newest first) and deduplicate
   enriched.sort((a, b) => b.timestamp - a.timestamp);
 
   const seen = new Set();
@@ -224,7 +227,7 @@ async function fetchAllFeeds() {
   newsCache.lastFetched = new Date().toISOString();
   newsCache.fetching = false;
 
-  console.log(`  Fetched ${articles.length} total articles, ${deduped.length} geopolitical after filtering.`);
+  console.log(`  ${articles.length} total → ${deduped.length} relevant articles.`);
 }
 
 // --- Static Files ---
@@ -283,12 +286,12 @@ app.get('/api/stats', (req, res) => {
 
 // --- Start ---
 app.listen(PORT, async () => {
-  console.log(`\n  Geopolitical News Dashboard`);
-  console.log(`  Running at http://localhost:${PORT}\n`);
+  console.log(`\n  Pulse — News Intelligence Dashboard`);
+  console.log(`  http://localhost:${PORT}\n`);
   await fetchAllFeeds();
 });
 
-// Refresh feeds every 30 minutes
-cron.schedule('*/30 * * * *', () => {
+// Refresh feeds every 15 minutes
+cron.schedule('*/15 * * * *', () => {
   fetchAllFeeds();
 });
